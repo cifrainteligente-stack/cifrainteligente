@@ -342,40 +342,33 @@ async function salvarJPG(){
         return;
     }
 
+    // 🔴 Guarda altura e overflow originais
+    const alturaOriginal = editor.style.height;
+    const overflowOriginal = editor.style.overflow;
+
+    // 🟢 Remove limite para pegar a música inteira
+    editor.style.height = "auto";
+    editor.style.overflow = "visible";
+
     const canvas = await html2canvas(editor, {
         scale: 2,
         useCORS: true,
         backgroundColor: "#ffffff"
     });
 
-    const blob = await new Promise(resolve => 
+    // 🔵 Restaura o editor ao normal
+    editor.style.height = alturaOriginal;
+    editor.style.overflow = overflowOriginal;
+
+    const blob = await new Promise(resolve =>
         canvas.toBlob(resolve, "image/jpeg", 0.95)
     );
 
-    const file = new File([blob], "musica.jpg", { type: "image/jpeg" });
-
-    // Compartilhar (celular)
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-
-        try {
-            await navigator.share({
-                title: "Minha Música",
-                text: "Segue minha música",
-                files: [file]
-            });
-        } catch(e){
-            console.log("Compartilhamento cancelado");
-        }
-
-    } else {
-        // Download normal (PC)
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "musica.jpg";
-        link.click();
-    }
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "musica.jpg";
+    link.click();
 }
-
 function apagarMusica(){
 
     let musicas = JSON.parse(localStorage.getItem("listaMusicas")) || [];

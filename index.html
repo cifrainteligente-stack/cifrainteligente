@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -179,6 +180,30 @@ header{
 
 .editor-bloqueado {
     pointer-events: none;
+}
+/* ===== MODO PALCO ===== */
+
+.modo-palco header,
+.modo-palco .botoes-topo,
+.modo-palco .botoes,
+.modo-palco .acoes {
+    display: none !important;
+}
+
+.modo-palco #editor {
+    background: black;
+    color: white;
+    font-size: 28px;
+    min-height: 100vh;
+    padding: 60px;
+}
+
+.modo-palco .player {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    border-radius: 0;
 }
 </style>
 </head>
@@ -385,25 +410,20 @@ Object.keys(escalas).forEach(t=>{
 });
 seletor.value=tomAtual;
 seletor.onchange=()=>{tomAtual=seletor.value; gerarBotoes();};
-
 let modoZoom = false;
 
 function toggleZoom(){
-    const body = document.body;
     const editor = document.getElementById("editor");
     const btn = document.getElementById("btnZoom");
+
     modoZoom = !modoZoom;
+
     if(modoZoom){
-        body.classList.add("modo-visualizacao");
-        editor.classList.add("editor-zoom");
-        editor.classList.add("editor-bloqueado");
-        editor.contentEditable = "false";
-        btn.textContent = "↩ Voltar Edição";
+        editor.style.transform = "scale(1.5)";
+        editor.style.transformOrigin = "top center";
+        btn.textContent = "↩ Voltar";
     } else {
-        body.classList.remove("modo-visualizacao");
-        editor.classList.remove("editor-zoom");
-        editor.classList.remove("editor-bloqueado");
-        editor.contentEditable = "true";
+        editor.style.transform = "scale(1)";
         btn.textContent = "🔍";
     }
 }

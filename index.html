@@ -272,11 +272,11 @@ Compasso: 4/4
 <div id="editor" contenteditable="true"></div>
 <div class="botoes" id="botoesDigitos" style="display:none; margin-top:5px;"></div>
 <div class="acoes">
-<button onclick="salvar()">Salvar  |</button>
-<button onclick="apagarMusica()">Apagar Salvo  |</button>
-<button onclick="buscar()">Buscar  |</button>
-<button onclick="apagar()">Limpar  |</button>
-<button onclick="salvarPDF()">Salvar em PDF |</button>
+<button onclick="salvar()">Salvar</button>
+<button onclick="apagarMusica()">Apagar Salvo</button>
+<button onclick="buscar()">Buscar</button>
+<button onclick="apagar()">Limpar</button>
+<button onclick="salvarPDF()">Salvar em PDF</button>
 </button>
 </div>
 
@@ -412,20 +412,21 @@ seletor.value=tomAtual;
 seletor.onchange=()=>{tomAtual=seletor.value; gerarBotoes();};
 let modoZoom = false;
 
+let tamanhoFonte = 16; // tamanho inicial
+
 function toggleZoom(){
     const editor = document.getElementById("editor");
     const btn = document.getElementById("btnZoom");
 
-    modoZoom = !modoZoom;
-
-    if(modoZoom){
-        editor.style.transform = "scale(1.5)";
-        editor.style.transformOrigin = "top center";
+    if(tamanhoFonte === 16){
+        tamanhoFonte = 24; // aumenta
         btn.textContent = "↩ Voltar";
     } else {
-        editor.style.transform = "scale(1)";
+        tamanhoFonte = 16; // volta ao normal
         btn.textContent = "🔍";
     }
+
+    editor.style.fontSize = tamanhoFonte + "px";
 }
 
 function gerarBotoes(){

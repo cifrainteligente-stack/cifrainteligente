@@ -225,8 +225,6 @@ Visitante
 </button>
     <p id="mensagemErro" style="color:red; display:none; margin-top:10px;">Senha incorreta fale com seu master</p>
     <hr style="margin:30px 0;">      
-    </div>
-    <br>
     
   </div>
 </div>
@@ -272,12 +270,12 @@ Compasso: 4/4
 <div id="editor" contenteditable="true"></div>
 <div class="botoes" id="botoesDigitos" style="display:none; margin-top:5px;"></div>
 <div class="acoes">
-<button onclick="salvar()">Salvar</button>
-<button onclick="apagarMusica()">Apagar Salvo</button>
-<button onclick="buscar()">Buscar</button>
-<button onclick="apagar()">Limpar</button>
-<button onclick="salvarPDF()">Salvar em PDF</button>
-</button>
+<button onclick="salvar()">Salvar |</button>
+<button onclick="apagarMusica()">Apagar Salvo |</button>
+<button onclick="buscar()">Buscar |</button>
+<button onclick="apagar()">Limpar |</button>
+<button onclick="salvarPDF()">Salvar PDF |</button>
+<button onclick="salvarJPG()">Salvar JPG |</button>
 </div>
 
 <!-- ----------------------- PLAYER UNIFICADO ----------------------- -->
@@ -315,6 +313,7 @@ Compasso: 4/4
 
 <script src="https://www.youtube.com/iframe_api"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 // ----------------------- LOGIN -----------------------
 // ----------------------- LOGIN -----------------------
@@ -334,6 +333,49 @@ function verificarSenha() {
     erro.style.display = "block";
   }
 }
+async function salvarJPG(){
+
+    const editor = document.getElementById("editor");
+
+    if(!editor.innerHTML.trim()){
+        alert("Editor vazio!");
+        return;
+    }
+
+    const canvas = await html2canvas(editor, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff"
+    });
+
+    const blob = await new Promise(resolve => 
+        canvas.toBlob(resolve, "image/jpeg", 0.95)
+    );
+
+    const file = new File([blob], "musica.jpg", { type: "image/jpeg" });
+
+    // Compartilhar (celular)
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+
+        try {
+            await navigator.share({
+                title: "Minha Música",
+                text: "Segue minha música",
+                files: [file]
+            });
+        } catch(e){
+            console.log("Compartilhamento cancelado");
+        }
+
+    } else {
+        // Download normal (PC)
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "musica.jpg";
+        link.click();
+    }
+}
+
 function apagarMusica(){
 
     let musicas = JSON.parse(localStorage.getItem("listaMusicas")) || [];
@@ -385,6 +427,7 @@ function logout() {
 
 // ----------------------- EDITOR -----------------------
 let tomAtual="C";
+let tomAnterior = tomAtual;
 let pipeAtivo=true;
 
 const escalas = {
@@ -409,7 +452,17 @@ Object.keys(escalas).forEach(t=>{
     seletor.appendChild(o);
 });
 seletor.value=tomAtual;
-seletor.onchange=()=>{tomAtual=seletor.value; gerarBotoes();};
+seletor.onchange = function(){
+
+    var novoTom = seletor.value;
+
+    transporMusica(tomAnterior, novoTom);
+
+    tomAnterior = novoTom;
+    tomAtual = novoTom;
+
+    gerarBotoes();
+};
 let modoZoom = false;
 
 let tamanhoFonte = 16; // tamanho inicial
@@ -657,6 +710,38 @@ async function salvarPDF(){
         link.download = "musica.pdf";
         link.click();
     }
+}
+function transporMusica(tomOrigem, tomDestino){
+
+    var editor = document.getElementById("editor");
+    var texto = editor.innerHTML;
+
+    var escalaOrigem = escalas[tomOrigem];
+    var escalaDestino = escalas[tomDestino];
+
+    // Criar cópia temporária para evitar troca dupla
+    for(var i = 0; i < escalaOrigem.length; i++){
+
+        var acordeOrigem = escalaOrigem[i];
+        var marcador = "##" + i + "##";
+
+        var regex = new RegExp("\\b" + acordeOrigem + "\\b", "g");
+
+        texto = texto.replace(regex, marcador);
+    }
+
+    // Agora substitui marcadores pelo destino
+    for(var i = 0; i < escalaDestino.length; i++){
+
+        var marcador = "##" + i + "##";
+        var acordeDestino = escalaDestino[i];
+
+        var regex = new RegExp(marcador, "g");
+
+        texto = texto.replace(regex, acordeDestino);
+    }
+
+    editor.innerHTML = texto;
 }
 
 // ----------------------- PLAYER UNIFICADO -----------------------
